@@ -1,0 +1,108 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# A/B Testing Deployment
+#
+# Two variants run in parallel. An nginx front-proxy routes requests based on
+# the `X-Variant` request header (or a cookie) to allow product/marketing teams
+# to bucket users deterministically and compare KPIs between A and B.
+# ──────────────────────────────────────────────────────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-variant-a
+  namespace: aceest
+  labels: { app: aceest-fitness, variant: A }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: aceest-fitness, variant: A } }
+  template:
+    metadata: { labels: { app: aceest-fitness, variant: A } }
+    spec:
+      containers:
+        - name: web
+          image: DOCKERHUB_USER/aceest-fitness:v3.0.1
+          ports: [{ containerPort: 5000 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-variant-b
+  namespace: aceest
+  labels: { app: aceest-fitness, variant: B }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: aceest-fitness, variant: B } }
+  template:
+    metadata: { labels: { app: aceest-fitness, variant: B } }
+    spec:
+      containers:
+        - name: web
+          image: DOCKERHUB_USER/aceest-fitness:v3.2.4
+          ports: [{ containerPort: 5000 }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: aceest-variant-a-svc, namespace: aceest }
+spec:
+  selector: { app: aceest-fitness, variant: A }
+  ports: [{ port: 5000, targetPort: 5000 }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: aceest-variant-b-svc, namespace: aceest }
+spec:
+  selector: { app: aceest-fitness, variant: B }
+  ports: [{ port: 5000, targetPort: 5000 }]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: aceest-ab-nginx, namespace: aceest }
+data:
+  nginx.conf: |
+    events {}
+    http {
+      map $http_x_variant $pool {
+        default        variant_a;
+        "B"            variant_b;
+        "A"            variant_a;
+      }
+      upstream variant_a { server aceest-variant-a-svc:5000; }
+      upstream variant_b { server aceest-variant-b-svc:5000; }
+      server {
+        listen 80;
+        location / {
+          proxy_set_header X-Variant $http_x_variant;
+          proxy_pass http://$pool;
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: aceest-ab-router, namespace: aceest }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: aceest-ab-router } }
+  template:
+    metadata: { labels: { app: aceest-ab-router } }
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine
+          ports: [{ containerPort: 80 }]
+          volumeMounts:
+            - { name: cfg, mountPath: /etc/nginx/nginx.conf, subPath: nginx.conf }
+      volumes:
+        - name: cfg
+          configMap: { name: aceest-ab-nginx }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: aceest-ab-entry, namespace: aceest }
+spec:
+  type: NodePort
+  selector: { app: aceest-ab-router }
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30085
