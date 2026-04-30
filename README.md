@@ -13,16 +13,70 @@ A Flask-based web application for ACEest Fitness & Gym management, featuring fit
 ## Project Structure
 
 ```
-├── app.py                  # Flask application
-├── test_app.py             # Pytest test suite
-├── requirements.txt        # Python dependencies
-├── Dockerfile              # Container configuration
-├── Jenkinsfile             # Jenkins pipeline definition
-├── .github/
-│   └── workflows/
-│       └── main.yml        # GitHub Actions CI/CD pipeline
+├── app.py                       # Flask application
+├── test_app.py                  # Pytest test suite
+├── requirements.txt             # Python dependencies
+├── Dockerfile                   # Container configuration
+├── Jenkinsfile                  # Jenkins pipeline (Assignment 2 — full CI/CD)
+├── sonar-project.properties     # SonarQube scanner config
+├── docker-compose.ci.yml        # Local Jenkins + SonarQube stack
+├── scripts/
+│   ├── setup-local-ci.sh        # Bootstraps Jenkins + SonarQube on macOS
+│   └── teardown-local-ci.sh
+├── k8s/                         # Kubernetes manifests (Assignment 2)
+│   ├── base/                    # Namespace + default deployment + service
+│   ├── rolling/                 # Rolling-update strategy
+│   ├── blue-green/              # Blue-green strategy + switch.sh
+│   ├── canary/                  # Canary release strategy
+│   ├── shadow/                  # Shadow deployment via nginx mirror
+│   └── ab-testing/              # Header-based A/B routing via nginx
+├── code-versions/               # Versioned legacy app revisions (v1.0 … v3.2.4)
+├── REPORT.md                    # Assignment 2 CI/CD report
+├── .github/workflows/main.yml   # GitHub Actions (Assignment 1)
 └── README.md
 ```
+
+## Assignment 2 — Full CI/CD on Local Kubernetes
+
+The Assignment 2 deliverable extends the project with Jenkins-driven CI/CD,
+SonarQube quality gates, Docker Hub publication, and Kubernetes deployments
+with all five rollout strategies (rolling, blue-green, canary, shadow, A/B).
+
+### Local infrastructure (macOS, Apple Silicon, Docker Desktop K8s)
+
+```bash
+# 1. Start the local stack (Jenkins:8080, SonarQube:9000)
+chmod +x scripts/*.sh k8s/blue-green/switch.sh
+./scripts/setup-local-ci.sh
+
+# 2. Configure Jenkins (one-time, see scripts/setup-local-ci.sh output)
+#    - Install plugins: Docker Pipeline, SonarQube Scanner, Kubernetes CLI
+#    - Add credentials: dockerhub-creds, sonar-token, kubeconfig
+#    - SonarQube server name: 'sonar', URL: http://sonarqube:9000
+
+# 3. Create a Jenkins Pipeline job pointing at this repo (script path: Jenkinsfile)
+#    Build with parameters → choose APP_VERSION + DEPLOY_STRATEGY.
+```
+
+### Deployment strategies
+
+See [k8s/README.md](k8s/README.md). Each strategy is exposed on its own NodePort:
+
+| Strategy   | URL                          |
+|------------|------------------------------|
+| Rolling    | http://localhost:30083        |
+| Blue-Green | http://localhost:30081        |
+| Canary     | http://localhost:30082        |
+| Shadow     | http://localhost:30084        |
+| A/B        | http://localhost:30085 (`X-Variant: A\|B`) |
+
+### Rollback
+
+* Rolling — `kubectl -n aceest rollout undo deploy/aceest-rolling`
+* Blue-Green — `./k8s/blue-green/switch.sh blue`
+* Canary — `kubectl -n aceest scale deploy/aceest-canary --replicas=0`
+
+Full architecture, challenges and outcomes are documented in [REPORT.md](REPORT.md).
 
 ## Local Setup & Execution
 
