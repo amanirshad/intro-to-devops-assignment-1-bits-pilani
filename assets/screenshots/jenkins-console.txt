@@ -1,0 +1,42 @@
+Jenkins pipeline console output (assignment-pipeline #1)
+
+Started by user admin
+[Pipeline] Start of Pipeline
+[Pipeline] node
+[Pipeline] Running on Jenkins in /var/jenkins_home/workspace/assignment-pipeline
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Build)
+[Pipeline] echo
+Building
+[Pipeline] sh
++ echo Build
+Build
++ sleep 1
+[Pipeline] } [Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test)
+[Pipeline] echo
+Testing
+[Pipeline] sh
++ echo Test
+Test
++ sleep 1
+[Pipeline] } [Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy)
+[Pipeline] echo
+Deploying
+[Pipeline] sh
++ echo Deploy
+Deploy
++ sleep 1
+[Pipeline] } [Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] echo
+Done
+[Pipeline] } [Pipeline] // stage
+[Pipeline] } [Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS

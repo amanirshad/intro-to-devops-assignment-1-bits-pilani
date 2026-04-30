@@ -32,6 +32,7 @@ A Flask-based web application for ACEest Fitness & Gym management, featuring fit
 │   └── ab-testing/              # Header-based A/B routing via nginx
 ├── code-versions/               # Versioned legacy app revisions (v1.0 … v3.2.4)
 ├── REPORT.md                    # Assignment 2 CI/CD report
+├── assets/screenshots/          # README screenshots for the submission
 ├── .github/workflows/main.yml   # GitHub Actions (Assignment 1)
 └── README.md
 ```
@@ -182,6 +183,22 @@ To configure Jenkins:
 2. Create a new Pipeline project.
 3. Point the pipeline to this repository.
 4. Jenkins will automatically detect the `Jenkinsfile` and run the stages.
+
+## Submission Screenshots
+
+These screenshots were captured from the live local setup and can be used in the assignment submission.
+
+### Application Home
+
+![ACEest app home](assets/screenshots/app-home.png)
+
+### Jenkins Dashboard
+
+![Jenkins dashboard](assets/screenshots/jenkins-dashboard.png)
+
+### SonarQube Quality Gate
+
+![SonarQube dashboard with passed quality gate](assets/screenshots/sonarqube-dashboard.png)
 
 ## Tech Stack
 

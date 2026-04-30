@@ -74,6 +74,24 @@ Submission Requirements:
 •	Challenges faced and mitigation strategies
 •	Key automation outcomes
 
+**Submission Artifacts (prepared)**
+
+- **Application:** [app.py](app.py)
+- **Pipeline:** [Jenkinsfile](Jenkinsfile)
+- **Container:** [Dockerfile](Dockerfile)
+- **Tests:** [test_app.py](test_app.py)
+- **Sonar config:** [sonar-project.properties](sonar-project.properties)
+- **Kubernetes manifests:** [k8s/](k8s/README.md)
+- **Screenshots:** assets/screenshots/
+	- [assets/screenshots/app-home.png](assets/screenshots/app-home.png)
+	- [assets/screenshots/jenkins-dashboard.png](assets/screenshots/jenkins-dashboard.png)
+	- [assets/screenshots/sonarqube-dashboard.png](assets/screenshots/sonarqube-dashboard.png)
+	- Jenkins pipeline console output (text): [assets/screenshots/jenkins-console.txt](assets/screenshots/jenkins-console.txt)
+
+**Notes**
+- A Jenkins pipeline job `assignment-pipeline` was created and executed locally; build #1 completed successfully. Console output is included above as a text artifact and is available live at: http://localhost:8080/job/assignment-pipeline/1/console
+- If you want the actual console screenshot image added to `assets/screenshots/`, tell me and I will save it there as `jenkins-console.png`.
+
 Submission Guidelines (On or Before) Deadline:
 •	Ensure your GitHub repository is public and accessible for review.
 •	Submit the endpoint URL of your running cluster with all types of deployment strategies by the specified deadline.

@@ -1,0 +1,34 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1508.v9cb_c3a_a_89dfd">
+  <actions/>
+  <description>Deploy to local Kubernetes using Jenkins</description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@4218.vff679a_5c0f3a_">
+    <script><![CDATA[
+pipeline {
+  agent any
+  stages {
+    stage('Deploy to Local K8s') {
+      steps {
+        sh '''
+          set -e
+          kubectl -n aceest rollout restart deployment/aceest-fitness
+          kubectl -n aceest rollout status deployment/aceest-fitness --timeout=180s
+          kubectl -n aceest get pods -o wide
+          kubectl -n aceest get svc aceest-fitness
+        '''
+      }
+    }
+  }
+  post {
+    success { echo 'Deployment via Jenkins completed.' }
+    failure { echo 'Deployment failed.' }
+  }
+}
+]]></script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
